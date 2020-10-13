@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Hexo</title>
+  <meta name="keywords" content="">
+  <meta name="description" content="Hexo">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="-– title: java8 之CompletableFuture – 如何构建异步应用 date: 2019-08-27 16:56:06 categories: 读书 tags: java -– 什么是Future 接口很多场景下，我们想去获取线程运行的结果，而通常使用execute方法去提交任务是无法获得结果的，这时候我们常常会改用submit方法去提交，以便获得线程运行的结果。 而sub">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://yoursite.com/2020/10/13/java8%20%E4%B9%8BCompletableFuture/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="-– title: java8 之CompletableFuture – 如何构建异步应用 date: 2019-08-27 16:56:06 categories: 读书 tags: java -– 什么是Future 接口很多场景下，我们想去获取线程运行的结果，而通常使用execute方法去提交任务是无法获得结果的，这时候我们常常会改用submit方法去提交，以便获得线程运行的结果。 而sub">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://common.cnblogs.com/images/copycode.gif">
+<meta property="og:image" content="https://img2018.cnblogs.com/blog/1098960/201905/1098960-20190527113151651-2049022214.png">
+<meta property="article:published_time" content="2020-10-13T07:43:59.172Z">
+<meta property="article:modified_time" content="2020-10-13T07:43:59.172Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://common.cnblogs.com/images/copycode.gif">
+
+
+<link rel="icon" href="/img/avatar.jpg">
+
+<link href="/css/style.css?v=1.1.0" rel="stylesheet">
+
+<link href="/css/hl_theme/atom-light.css?v=1.1.0" rel="stylesheet">
+
+<link href="//cdn.jsdelivr.net/npm/animate.css@4.1.0/animate.min.css" rel="stylesheet">
+
+<script src="//cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+<script src="/js/titleTip.js?v=1.1.0" ></script>
+
+<script src="//cdn.jsdelivr.net/npm/highlightjs@9.16.2/highlight.pack.min.js"></script>
+<script>
+    hljs.initHighlightingOnLoad();
+</script>
+
+<script src="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js"></script>
+
+
+
+<script src="//cdn.jsdelivr.net/npm/jquery.cookie@1.4.1/jquery.cookie.min.js" ></script>
+
+<script src="/js/iconfont.js?v=1.1.0" ></script>
+
+<meta name="generator" content="Hexo 5.1.1"></head>
+<div style="display: none">
+  <input class="theme_disqus_on" value="false">
+  <input class="theme_preload_comment" value="">
+  <input class="theme_blog_path" value="">
+  <input id="theme_shortcut" value="true" />
+  <input id="theme_highlight_on" value="true" />
+  <input id="theme_code_copy" value="true" />
+</div>
+
+
+
+<body>
+<aside class="nav">
+    <div class="nav-left">
+        <a href="/" class="avatar_target">
+    <img class="avatar" src="/img/avatar.jpg" />
+</a>
+<div class="author">
+    <span>John Doe</span>
+</div>
+
+<div class="icon">
+    
+        
+        <a title="rss" href="/atom.xml" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-rss"></use>
+                </svg>
+            
+        </a>
+        
+    
+        
+        <a title="github" href="https://github.com/yelog" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-github"></use>
+                </svg>
+            
+        </a>
+        
+    
+        
+        <a title="facebook" href="https://www.facebook.com/faker.tops" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-facebook"></use>
+                </svg>
+            
+        </a>
+        
+    
+        
+    
+        
+    
+        
+        <a title="instagram" href="https://www.facebook.com/faker.tops" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-instagram"></use>
+                </svg>
+            
+        </a>
+        
+    
+        
+        <a title="reddit" href="https://www.reddit.com/user/yelog/" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-reddit"></use>
+                </svg>
+            
+        </a>
+        
+    
+        
+        <a title="weibo" href="http://weibo.com/u/2307534817" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-weibo"></use>
+                </svg>
+            
+        </a>
+        
+    
+        
+        <a title="jianshu" href="https://www.jianshu.com/u/ff56736de7cf" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-jianshu"></use>
+                </svg>
+            
+        </a>
+        
+    
+        
+        <a title="zhihu" href="https://www.zhihu.com/people/jaytp/activities" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-zhihu"></use>
+                </svg>
+            
+        </a>
+        
+    
+        
+    
+        
+        <a title="oschina" href="https://my.oschina.net/yelog" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-oschina"></use>
+                </svg>
+            
+        </a>
+        
+    
+        
+    
+        
+        <a title="email" href="mailto:jaytp@qq.com" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-email"></use>
+                </svg>
+            
+        </a>
+        
+    
+        
+        <a title="qq" href="http://wpa.qq.com/msgrd?v=3&uin=872336115&site=qq&menu=yes" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-qq"></use>
+                </svg>
+            
+        </a>
+        
+    
+        
+        <a title="kugou" href="https://www.kugou.com/" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-kugou"></use>
+                </svg>
+            
+        </a>
+        
+    
+        
+        <a title="neteasemusic" href="https://music.163.com/#/user/home?id=88151013" target="_blank">
+            
+                <svg class="iconfont-svg" aria-hidden="true">
+                    <use xlink:href="#icon-neteasemusic"></use>
+                </svg>
+            
+        </a>
+        
+    
+</div>
+
+
+
+
+<ul>
+    <li><div class="all active" data-rel="All">All<small>(3)</small></div></li>
+    
+        
+            
+            <li><div data-rel="读书">读书<small>(1)</small></div>
+                
+            </li>
+            
+        
+    
+</ul>
+<div class="left-bottom">
+    <div class="menus">
+    
+    
+    
+    
+    </div>
+    <div><a class="about  hasFriend  site_url"  href="/about">About</a><a style="width: 50%"  class="friends">Friends</a></div>
+</div>
+<input type="hidden" id="yelog_site_posts_number" value="3">
+
+<div style="display: none">
+    <span id="busuanzi_value_site_uv"></span>
+    <span id="busuanzi_value_site_pv"></span>
+</div>
+
+    </div>
+    <div class="nav-right">
+        <div class="friends-area">
+    <div class="friends-title">
+        Links
+        <i class="iconfont icon-left"></i>
+    </div>
+    <div class="friends-content">
+        <ul>
+            
+            <li><a target="_blank" href="http://yelog.org/">叶落阁</a></li>
+            
+        </ul>
+    </div>
+</div>
+        <div class="title-list">
+    <div class="right-top">
+        <div id="default-panel">
+            <i class="iconfont icon-search" data-title="搜索 快捷键 i"></i>
+            <div class="right-title">All</div>
+            <i class="iconfont icon-file-tree" data-title="切换到大纲视图 快捷键 w"></i>
+        </div>
+        <div id="search-panel">
+            <i class="iconfont icon-left" data-title="返回"></i>
+            <input id="local-search-input" />
+            <label class="border-line" for="input"></label>
+            <i class="iconfont icon-case-sensitive" data-title="大小写敏感"></i>
+            <i class="iconfont icon-tag" data-title="标签"></i>
+        </div>
+        <div id="outline-panel" style="display: none">
+            <div class="right-title">大纲</div>
+            <i class="iconfont icon-list" data-title="切换到文章列表"></i>
+        </div>
+    </div>
+
+    <div class="tags-list">
+    <input id="tag-search" />
+    <div class="tag-wrapper">
+        
+            <li class="article-tag-list-item">
+                <i class="iconfont icon-tag"></i><a>java</a>
+            </li>
+        
+    </div>
+
+</div>
+
+    
+    <nav id="title-list-nav">
+        
+        <a  class="All "
+           href="/2020/10/13/java8%20%E4%B9%8BCompletableFuture/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title=""></span>
+            <span class="post-date" title="2020-10-13 15:43:59">2020/10/13</span>
+        </a>
+        
+        <a  class="All 读书 "
+           href="/2020/08/27/djy/"
+           data-tag="java"
+           data-author="" >
+            <span class="post-title" title="djy">djy</span>
+            <span class="post-date" title="2020-08-27 16:56:06">2020/08/27</span>
+        </a>
+        
+        <a  class="All "
+           href="/2020/08/24/hello-world/"
+           data-tag=""
+           data-author="" >
+            <span class="post-title" title="Hello World">Hello World</span>
+            <span class="post-date" title="2020-08-24 17:47:47">2020/08/24</span>
+        </a>
+        
+        <div id="no-item-tips">
+
+        </div>
+    </nav>
+    <div id="outline-list">
+    </div>
+</div>
+    </div>
+    <div class="hide-list">
+        <div class="semicircle" data-title="切换全屏 快捷键 s">
+            <div class="brackets first"><</div>
+            <div class="brackets">&gt;</div>
+        </div>
+    </div>
+</aside>
+<div id="post">
+    <div class="pjax">
+        <article id="post-java8 之CompletableFuture" class="article article-type-post" itemscope itemprop="blogPost">
+    
+    <div class="article-meta">
+        
+        
+        
+        
+    </div>
+    <div class="article-meta">
+        
+            Created At : <time class="date" title='Updated At: 2020-10-13 15:43:59'>2020-10-13 15:43</time>
+        
+    </div>
+    <div class="article-meta">
+        
+        
+        <span id="busuanzi_container_page_pv">
+            Views 👀 :<span id="busuanzi_value_page_pv">
+                <span class="count-comment">
+                    <span class="spinner">
+                      <div class="cube1"></div>
+                      <div class="cube2"></div>
+                    </span>
+                </span>
+            </span>
+        </span>
+        
+        
+    </div>
+    
+    <div class="toc-ref">
+    
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFFuture-%E6%8E%A5%E5%8F%A3"><span class="toc-text">什么是Future 接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Future-%E6%8E%A5%E5%8F%A3%E7%9A%84%E7%BC%BA%E9%99%B7"><span class="toc-text">Future 接口的缺陷</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CompletableFuture-%E4%BD%BF%E4%B8%80%E5%88%87%E5%8F%98%E5%BE%97%E5%8F%AF%E8%83%BD"><span class="toc-text">CompletableFuture 使一切变得可能</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CompletableFuture-%E5%B8%B8%E8%A7%81api-%E4%BB%8B%E7%BB%8D"><span class="toc-text">CompletableFuture 常见api 介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%E3%80%81-runAsync-%E5%92%8C-supplyAsync%E6%96%B9%E6%B3%95"><span class="toc-text">1、 runAsync 和 supplyAsync方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2%E3%80%81-%E5%BC%82%E6%AD%A5%E4%BB%BB%E5%8A%A1%E6%89%A7%E8%A1%8C%E5%AE%8C%E6%97%B6%E7%9A%84%E5%9B%9E%E8%B0%83%E6%96%B9%E6%B3%95-whenComplete-%E5%92%8C-exceptionally"><span class="toc-text">2、 异步任务执行完时的回调方法 whenComplete 和 exceptionally</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3%E3%80%81-thenApply-%E5%92%8C-handle-%E6%96%B9%E6%B3%95"><span class="toc-text">3、 thenApply 和 handle 方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4%E3%80%81-%E5%90%88%E5%B9%B6%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95-thenCombine-%E5%92%8C-thenAcceptBoth"><span class="toc-text">4、 合并操作方法 thenCombine 和 thenAcceptBoth</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4%E3%80%81-allOf-%EF%BC%88%E9%87%8D%E7%82%B9%EF%BC%8C%E4%B8%AA%E4%BA%BA%E8%A7%89%E5%BE%97%E7%94%A8%E7%9A%84%E5%9C%BA%E6%99%AF%E5%BE%88%E5%A4%9A%EF%BC%89"><span class="toc-text">4、 allOf （重点，个人觉得用的场景很多）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CompletableFuture-%E6%80%BB%E7%BB%93"><span class="toc-text">CompletableFuture 总结</span></a></li></ol>
+    
+<style>
+    .left-col .switch-btn,
+    .left-col .switch-area {
+        display: none;
+    }
+    .toc-level-3 i,
+    .toc-level-3 ol {
+        display: none !important;
+    }
+</style>
+</div>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>-–</p>
+<p>title: java8 之CompletableFuture – 如何构建异步应用</p>
+<p>date: 2019-08-27 16:56:06</p>
+<p>categories: 读书</p>
+<p>tags: java</p>
+<p>-–</p>
+<h2 id="什么是Future-接口"><a href="#什么是Future-接口" class="headerlink" title="什么是Future 接口"></a>什么是Future 接口</h2><p>很多场景下，我们想去获取线程运行的结果，而通常使用execute方法去提交任务是无法获得结果的，这时候我们常常会改用submit方法去提交，以便获得线程运行的结果。</p>
+<p>而submit方法返回的就是Future，一个未来对象。 使用future.get() 方法去获取线程执行结果，包括如果出现异常，也会随get方法抛出。</p>
+<h2 id="Future-接口的缺陷"><a href="#Future-接口的缺陷" class="headerlink" title="Future 接口的缺陷"></a>Future 接口的缺陷</h2><p>当我们使用future.get()方法去取得线程执行结果时，要知道get方法是阻塞的，也就是说为了拿到结果，当主线程执行到get()方法，当前线程会去等待异步任务执行完成，</p>
+<p>换言之，异步的效果在我们使用get()拿结果时，会变得无效。示例如下</p>
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) throws Exception&#123;</span><br><span class="line">        ExecutorService executorService &#x3D; Executors.newSingleThreadExecutor();</span><br><span class="line">        Future future &#x3D; executorService.submit(()-&gt;&#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                Thread.sleep(3000);</span><br><span class="line">            &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(&quot;异步任务执行了&quot;);</span><br><span class="line">        &#125;);</span><br><span class="line">        future.get();</span><br><span class="line"></span><br><span class="line">        System.out.println(&quot;主线任务执行了&quot;);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<p>打印结果是：异步任务执行了过后主线任务才执行。 就是因为get()在一直等待。</p>
+<p>那么如何解决我想要拿到结果，可以对结果进行处理，又不想被阻塞呢？</p>
+<h2 id="CompletableFuture-使一切变得可能"><a href="#CompletableFuture-使一切变得可能" class="headerlink" title="CompletableFuture 使一切变得可能"></a>CompletableFuture 使一切变得可能</h2><p>JDK1.8才新加入的一个实现类<code>CompletableFuture</code>，实现了<code>Future&lt;T&gt;</code>, <code>CompletionStage&lt;T&gt;</code>两个接口。</p>
+<p>实际开发中，我们常常面对如下的几种场景：</p>
+<p>\1. 针对Future的完成事件，不想简单的阻塞等待，在这段时间内，我们希望可以正常继续往下执行，所以在它完成时，我们可以收到回调即可。</p>
+<p>\2. 面对Future集合来讲，这其中的每个Future结果其实很难去描述它们之间的依赖关系，而往往我们希望等待所有的Future集合都完成，然后做一些事情。</p>
+<p>\3. 在异步计算中，两个计算任务相互独立，但是任务二又依赖于任务一的结果。</p>
+<p>如上的几种场景，单靠Future是解决不了的，而CompletableFuture则可以帮我们实现。</p>
+<h2 id=""><a href="#" class="headerlink" title=""></a></h2><h2 id="CompletableFuture-常见api-介绍"><a href="#CompletableFuture-常见api-介绍" class="headerlink" title="CompletableFuture 常见api 介绍"></a>CompletableFuture 常见api 介绍</h2><h3 id="1、-runAsync-和-supplyAsync方法"><a href="#1、-runAsync-和-supplyAsync方法" class="headerlink" title="1、 runAsync 和 supplyAsync方法"></a>1、 runAsync 和 supplyAsync方法</h3><p> 它提供了四个方法来创建一个异步任务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public static CompletableFuture&lt;Void&gt; runAsync(Runnable runnable)</span><br><span class="line">public static CompletableFuture&lt;Void&gt; runAsync(Runnable runnable, Executor executor)</span><br><span class="line">public static &lt;U&gt; CompletableFuture&lt;U&gt; supplyAsync(Supplier&lt;U&gt; supplier)</span><br><span class="line">public static &lt;U&gt; CompletableFuture&lt;U&gt; supplyAsync(Supplier&lt;U&gt; supplier, Executor executor)</span><br></pre></td></tr></table></figure>
+
+
+
+<p>runAsync类似于execute方法，不支持返回值，而supplyAsync方法类似submit方法，支持返回值。也是我们的重点方法。</p>
+<p>没有指定Executor的方法会使用ForkJoinPool.commonPool() 作为它的线程池执行异步代码。</p>
+<p>　　示例</p>
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">　　 &#x2F;&#x2F;无返回值</span><br><span class="line">CompletableFuture&lt;Void&gt; future1 &#x3D; CompletableFuture.runAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;runAsync无返回值&quot;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">future1.get();</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;有返回值</span><br><span class="line">CompletableFuture&lt;String&gt; future2 &#x3D; CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    System.out.println(&quot;supplyAsync有返回值&quot;);</span><br><span class="line">    return &quot;111&quot;;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">String s &#x3D; future2.get();</span><br></pre></td></tr></table></figure>
+
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<h3 id="2、-异步任务执行完时的回调方法-whenComplete-和-exceptionally"><a href="#2、-异步任务执行完时的回调方法-whenComplete-和-exceptionally" class="headerlink" title="2、 异步任务执行完时的回调方法 whenComplete 和 exceptionally"></a>2、 异步任务执行完时的回调方法 whenComplete 和 exceptionally</h3><p> 当CompletableFuture的计算结果完成，或者抛出异常的时候，可以执行特定的任务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public CompletableFuture&lt;T&gt; whenComplete(BiConsumer&lt;? super T,? super Throwable&gt; action)</span><br><span class="line">public CompletableFuture&lt;T&gt; whenCompleteAsync(BiConsumer&lt;? super T,? super Throwable&gt; action)</span><br><span class="line">public CompletableFuture&lt;T&gt; whenCompleteAsync(BiConsumer&lt;? super T,? super Throwable&gt; action, Executor executor)</span><br><span class="line">public CompletableFuture&lt;T&gt; exceptionally(Function&lt;Throwable,? extends T&gt; fn)</span><br></pre></td></tr></table></figure>
+
+
+
+<p>这些方法都是上述创建的异步任务完成后 (也可能是抛出异常后结束) 所执行的方法。</p>
+<p>whenComplete和whenCompleteAsync方法的区别在于：前者是由上面的线程继续执行，而后者是将whenCompleteAsync的任务继续交给线程池去做决定。</p>
+<p>exceptionally则是上面的任务执行抛出异常后，所要执行的方法。</p>
+<p>示例</p>
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture.supplyAsync(()-&gt;&#123;</span><br><span class="line">        int a &#x3D; 10&#x2F;0;</span><br><span class="line">        return 1;</span><br><span class="line">    &#125;).whenComplete((r, e)-&gt;&#123;</span><br><span class="line">        System.out.println(r);</span><br><span class="line">    &#125;).exceptionally(e-&gt;&#123;</span><br><span class="line">        System.out.println(e);</span><br><span class="line">        return 2;</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<p>值得注意的是：哪怕supplyAsync抛出了异常，whenComplete也会执行，意思就是，只要supplyAsync执行结束，它就会执行，不管是不是正常执行完。exceptionally只有在异常的时候才会执行。</p>
+<p>其实，在whenComplete的参数内 e就代表异常了，判断它是否为null，就可以判断是否有异常，只不过这样的做法，我们不提倡。</p>
+<p>whenComplete和exceptionally这两个，谁在前，谁先执行。 </p>
+<p>此类的回调方法，哪怕主线程已经执行结束，已经跳出外围的方法体，然后回调方法依然可以继续等待异步任务执行完成再触发，丝毫不受外部影响。</p>
+<h3 id="3、-thenApply-和-handle-方法"><a href="#3、-thenApply-和-handle-方法" class="headerlink" title="3、 thenApply 和 handle 方法"></a>3、 thenApply 和 handle 方法</h3><p>如果两个任务之间有依赖关系，比如B任务依赖于A任务的执行结果，那么就可以使用这两个方法</p>
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public &lt;U&gt; CompletableFuture&lt;U&gt; thenApply(Function&lt;? super T,? extends U&gt; fn)</span><br><span class="line">public &lt;U&gt; CompletableFuture&lt;U&gt; thenApplyAsync(Function&lt;? super T,? extends U&gt; fn)</span><br><span class="line">public &lt;U&gt; CompletableFuture&lt;U&gt; thenApplyAsync(Function&lt;? super T,? extends U&gt; fn, Executor executor)</span><br><span class="line"></span><br><span class="line">public &lt;U&gt; CompletionStage&lt;U&gt; handle(BiFunction&lt;? super T, Throwable, ? extends U&gt; fn);</span><br><span class="line">public &lt;U&gt; CompletionStage&lt;U&gt; handleAsync(BiFunction&lt;? super T, Throwable, ? extends U&gt; fn);</span><br><span class="line">public &lt;U&gt; CompletionStage&lt;U&gt; handleAsync(BiFunction&lt;? super T, Throwable, ? extends U&gt; fn,Executor executor);</span><br></pre></td></tr></table></figure>
+
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<p>这两个方法，效果是一样的，区别在于，当A任务执行出现异常时，thenApply方法不会执行，而handle 方法一样会去执行，因为在handle方法里，我们可以处理异常，而前者不行。</p>
+<p>示例</p>
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture.supplyAsync(()-&gt;&#123;</span><br><span class="line">    return 5;</span><br><span class="line">&#125;).thenApply((r)-&gt;&#123;</span><br><span class="line">    r &#x3D; r + 1;</span><br><span class="line">    return r;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;出现了异常，handle方法可以拿到异常 e</span><br><span class="line">CompletableFuture.supplyAsync(()-&gt;&#123;</span><br><span class="line">    int i &#x3D; 10&#x2F;0;</span><br><span class="line">    return 5;</span><br><span class="line">&#125;).handle((r, e)-&gt;&#123;</span><br><span class="line">    System.out.println(e);</span><br><span class="line">    r &#x3D; r + 1;</span><br><span class="line">    return r;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<p>这里延伸两个方法 thenAccept 和 thenRun。其实 和上面两个方法差不多，都是等待前面一个任务执行完 再执行。区别就在于thenAccept接收前面任务的结果，且无需return。而thenRun只要前面的任务执行完成，它就执行，不关心前面的执行结果如何</p>
+<p>如果前面的任务抛了异常，非正常结束，这两个方法是不会执行的，所以处理不了异常情况。</p>
+<h3 id="4、-合并操作方法-thenCombine-和-thenAcceptBoth"><a href="#4、-合并操作方法-thenCombine-和-thenAcceptBoth" class="headerlink" title="4、 合并操作方法 thenCombine 和 thenAcceptBoth"></a>4、 合并操作方法 thenCombine 和 thenAcceptBoth</h3><p>我们常常需要合并两个任务的结果，在对其进行统一处理，简言之，这里的回调任务需要等待两个任务都完成后再会触发。</p>
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public &lt;U,V&gt; CompletionStage&lt;V&gt; thenCombine(CompletionStage&lt;? extends U&gt; other,BiFunction&lt;? super T,? super U,? extends V&gt; fn);</span><br><span class="line">public &lt;U,V&gt; CompletionStage&lt;V&gt; thenCombineAsync(CompletionStage&lt;? extends U&gt; other,BiFunction&lt;? super T,? super U,? extends V&gt; fn);</span><br><span class="line">public &lt;U,V&gt; CompletionStage&lt;V&gt; thenCombineAsync(CompletionStage&lt;? extends U&gt; other,BiFunction&lt;? super T,? super U,? extends V&gt; fn,Executor executor);</span><br><span class="line"></span><br><span class="line">public &lt;U&gt; CompletionStage&lt;Void&gt; thenAcceptBoth(CompletionStage&lt;? extends U&gt; other,BiConsumer&lt;? super T, ? super U&gt; action);</span><br><span class="line">public &lt;U&gt; CompletionStage&lt;Void&gt; thenAcceptBothAsync(CompletionStage&lt;? extends U&gt; other,BiConsumer&lt;? super T, ? super U&gt; action);</span><br><span class="line">public &lt;U&gt; CompletionStage&lt;Void&gt; thenAcceptBothAsync(CompletionStage&lt;? extends U&gt; other,BiConsumer&lt;? super T, ? super U&gt; action,     Executor executor);</span><br></pre></td></tr></table></figure>
+
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<p>这两者的区别 在于 前者是有返回值的，后者没有（就是个消耗工作）</p>
+<p>示例</p>
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">private static void thenCombine() throws Exception &#123;</span><br><span class="line"></span><br><span class="line">        CompletableFuture&lt;String&gt; future1 &#x3D; CompletableFuture.supplyAsync(()-&gt;&#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                Thread.sleep(4000);</span><br><span class="line">            &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">            return &quot;future1&quot;;</span><br><span class="line">        &#125;);</span><br><span class="line">        CompletableFuture&lt;String&gt; future2 &#x3D; CompletableFuture.supplyAsync(()-&gt;&#123;</span><br><span class="line">            return &quot;future2&quot;;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        CompletableFuture&lt;String&gt; result &#x3D; future1.thenCombine(future2, (r1, r2)-&gt;&#123;</span><br><span class="line">            return r1 + r2;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F;这里的get是阻塞的，需要等上面两个任务都完成</span><br><span class="line">        System.out.println(result.get());</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">private static void thenAcceptBoth() throws Exception &#123;</span><br><span class="line"></span><br><span class="line">        CompletableFuture&lt;String&gt; future1 &#x3D; CompletableFuture.supplyAsync(()-&gt;&#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                Thread.sleep(4000);</span><br><span class="line">            &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">            return &quot;future1&quot;;</span><br><span class="line">        &#125;);</span><br><span class="line">        CompletableFuture&lt;String&gt; future2 &#x3D; CompletableFuture.supplyAsync(()-&gt;&#123;</span><br><span class="line">            return &quot;future2&quot;;</span><br><span class="line">        &#125;);</span><br><span class="line">        &#x2F;&#x2F;值得注意的是，这里是不阻塞的</span><br><span class="line">        future1.thenAcceptBoth(future2, (r1, r2)-&gt;&#123;</span><br><span class="line">            System.out.println(r1 + r2);</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        System.out.println(&quot;继续往下执行&quot;);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<p>这两个方法 都不会形成阻塞。就是个回调方法。只有get（）才会阻塞。</p>
+<h3 id="4、-allOf-（重点，个人觉得用的场景很多）"><a href="#4、-allOf-（重点，个人觉得用的场景很多）" class="headerlink" title="4、 allOf （重点，个人觉得用的场景很多）"></a>4、 allOf （重点，个人觉得用的场景很多）</h3><p>　　很多时候，不止存在两个异步任务，可能有几十上百个。我们需要等这些任务都完成后，再来执行相应的操作。那怎么集中监听所有任务执行结束与否呢？ allOf方法可以帮我们完成。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public static CompletableFuture&lt;Void&gt; allOf(CompletableFuture&lt;?&gt;... cfs);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>它接收一个可变入参，既可以接收CompletableFuture单个对象，可以接收其数组对象。</p>
+<p>结合例子说明其作用。</p>
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) throws Exception&#123;</span><br><span class="line">        long start &#x3D; System.currentTimeMillis();</span><br><span class="line">        CompletableFutureTest test &#x3D; new CompletableFutureTest();</span><br><span class="line">        &#x2F;&#x2F; 结果集</span><br><span class="line">        List&lt;String&gt; list &#x3D; new ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        List&lt;Integer&gt; taskList &#x3D; Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);</span><br><span class="line">        &#x2F;&#x2F; 全流式处理转换成CompletableFuture[]</span><br><span class="line">        CompletableFuture[] cfs &#x3D; taskList.stream()</span><br><span class="line">                .map(integer -&gt; CompletableFuture.supplyAsync(() -&gt; test.calc(integer))</span><br><span class="line">                        .thenApply(h-&gt;Integer.toString(h))</span><br><span class="line">                        .whenComplete((s, e) -&gt; &#123;</span><br><span class="line">                            System.out.println(&quot;任务&quot;+s+&quot;完成!result&#x3D;&quot;+s+&quot;，异常 e&#x3D;&quot;+e+&quot;,&quot;+new Date());</span><br><span class="line">                            list.add(s);</span><br><span class="line">                        &#125;)</span><br><span class="line">                ).toArray(CompletableFuture[]::new);</span><br><span class="line">        </span><br><span class="line">        CompletableFuture.allOf(cfs).join();</span><br><span class="line">        </span><br><span class="line">        System.out.println(&quot;list&#x3D;&quot;+list+&quot;,耗时&#x3D;&quot;+(System.currentTimeMillis()-start));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public int calc(Integer i) &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            if (i &#x3D;&#x3D; 1) &#123;</span><br><span class="line">                Thread.sleep(3000);&#x2F;&#x2F;任务1耗时3秒</span><br><span class="line">            &#125; else if (i &#x3D;&#x3D; 5) &#123;</span><br><span class="line">                Thread.sleep(5000);&#x2F;&#x2F;任务5耗时5秒</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                Thread.sleep(1000);&#x2F;&#x2F;其它任务耗时1秒</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        return i;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><a href="javascript:void(0);"><img src="https://common.cnblogs.com/images/copycode.gif" alt="复制代码"></a></p>
+<p>全流式写法，综合了以上的一些方法，使用allOf集中阻塞，等待所有任务执行完成，取得结果集list。  这里有些CountDownLatch的感觉。</p>
+<h2 id="CompletableFuture-总结"><a href="#CompletableFuture-总结" class="headerlink" title="CompletableFuture 总结"></a>CompletableFuture 总结</h2><p><img src="https://img2018.cnblogs.com/blog/1098960/201905/1098960-20190527113151651-2049022214.png" alt="img"></p>
+<p>图片出自</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/dennyzhangdd/p/7010972.html">https://www.cnblogs.com/dennyzhangdd/p/7010972.html</a></p>
+<p>本文只是简述了CompletableFuture的常用用法。日常开发基本够用，但是针对一些特殊场景，例如异常场景，取消场景，仍待研究。</p>
+
+      
+       <hr><span style="font-style: italic;color: gray;"> 转载请注明来源，欢迎对文章中的引用来源进行考证，欢迎指出任何有错误或不够清晰的表达。可以在下面评论区评论，也可以邮件至 jaytp@qq.com </span>
+    </div>
+</article>
+
+
+<p>
+    <a  class="dashang" onclick="dashangToggle()">💰</a>
+</p>
+
+
+
+
+
+
+    
+
+
+
+
+    </div>
+    <div class="copyright">
+        <p class="footer-entry">
+    ©2016-2020 Yelog
+</p>
+<p class="footer-entry">Built with <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/yelog/hexo-theme-3-hexo" target="_blank">3-hexo</a> theme</p>
+
+    </div>
+    <div class="full-toc">
+        <button class="full" data-title="切换全屏 快捷键 s"><span class="min "></span></button>
+<a class="" id="rocket" ></a>
+
+    </div>
+</div>
+
+<div class="hide_box" onclick="dashangToggle()"></div>
+<div class="shang_box">
+    <a class="shang_close"  onclick="dashangToggle()">×</a>
+    <div class="shang_tit">
+        <p>Help us with donation</p>
+    </div>
+    <div class="shang_payimg">
+        <div class="pay_img">
+            <img src="/img/alipay.jpg" class="alipay" title="扫码支持">
+            <img src="/img/weixin.jpg" class="weixin" title="扫码支持">
+        </div>
+    </div>
+    <div class="shang_payselect">
+        <span><label><input type="radio" name="pay" checked value="alipay">alipay</label></span><span><label><input type="radio" name="pay" value="weixin">weixin</label></span>
+    </div>
+</div>
+
+
+</body>
+<script src="/js/jquery.pjax.js?v=1.1.0" ></script>
+
+<script src="/js/script.js?v=1.1.0" ></script>
+<script>
+    var img_resize = 'default';
+    function initArticle() {
+        /*渲染对应的表格样式*/
+        
+            $("#post .pjax table").addClass("green_title");
+        
+
+        /*渲染打赏样式*/
+        
+        $("input[name=pay]").on("click", function () {
+            if($("input[name=pay]:checked").val()=="weixin"){
+                $(".shang_box .shang_payimg .pay_img").addClass("weixin_img");
+            } else {
+                $(".shang_box .shang_payimg .pay_img").removeClass("weixin_img");
+            }
+        })
+        
+
+        /*高亮代码块行号*/
+        
+
+        /*访问数量*/
+        
+        $.getScript("//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js");
+        
+
+        /*代码高亮，行号对齐*/
+        $('.pre-numbering').css('line-height',$('.has-numbering').css('line-height'));
+
+        
+        
+    }
+
+    /*打赏页面隐藏与展示*/
+    
+    function dashangToggle() {
+        $(".shang_box").fadeToggle();
+        $(".hide_box").fadeToggle();
+    }
+    
+
+</script>
+
+<!--加入行号的高亮代码块样式-->
+
+<!--自定义样式设置-->
+<style>
+    
+    
+    .nav {
+        width: 542px;
+    }
+    .nav.fullscreen {
+        margin-left: -542px;
+    }
+    .nav-left {
+        width: 120px;
+    }
+    
+    
+    @media screen and (max-width: 1468px) {
+        .nav {
+            width: 492px;
+        }
+        .nav.fullscreen {
+            margin-left: -492px;
+        }
+        .nav-left {
+            width: 100px;
+        }
+    }
+    
+    
+    @media screen and (max-width: 1024px) {
+        .nav {
+            width: 492px;
+            margin-left: -492px
+        }
+        .nav.fullscreen {
+            margin-left: 0;
+        }
+    }
+    
+    @media screen and (max-width: 426px) {
+        .nav {
+            width: 100%;
+        }
+        .nav-left {
+            width: 100%;
+        }
+    }
+    
+    
+    .nav-right .title-list nav a .post-title, .nav-right .title-list #local-search-result a .post-title {
+        color: #383636;
+    }
+    
+    
+    .nav-right .title-list nav a .post-date, .nav-right .title-list #local-search-result a .post-date {
+        color: #5e5e5f;
+    }
+    
+    
+    .nav-right nav a.hover, #local-search-result a.hover{
+        background-color: #e2e0e0;
+    }
+    
+    
+
+    /*列表样式*/
+    
+
+    /* 背景图样式 */
+    
+    
+
+
+    /*引用块样式*/
+    
+
+    /*文章列表背景图*/
+    
+
+    
+</style>
+
+
+
+
+
+
+
+</html>
